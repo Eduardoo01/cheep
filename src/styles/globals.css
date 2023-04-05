@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply m-auto flex w-full flex-col justify-center bg-slate-100 text-black md:max-w-3xl;
+}
