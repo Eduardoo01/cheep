@@ -17,10 +17,29 @@ import Image from "next/image";
 
 dayjs.extend(relativeTime);
 
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+
+  // TODO ADD LOADING STATE
+  if (postsLoading) return <div>Loading posts...</div>;
+
+  if (!data) return <div>Something went wrong 😒</div>;
+
+  return (
+    <div className="flex flex-col gap-8 overflow-y-scroll p-4">
+      {[...data].map((postWithUser) => (
+        <PostView {...postWithUser} key={postWithUser.post.id}></PostView>
+      ))}
+    </div>
+  );
+};
+
 const CreatePost = () => {
-  const { user } = useUser();
+  const { user, isLoaded: userLoaded } = useUser();
   console.log(user);
-  if (!user) return null;
+
+  //TODO RETURN LOADING STATE
+  if (!user || !userLoaded) return <div>Loading user...</div>;
 
   return (
     <div className="flex w-full gap-14">
@@ -42,6 +61,7 @@ const CreatePost = () => {
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
+// TODO ADD ALT FOR IMAGES
 const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
@@ -67,9 +87,8 @@ const PostView = (props: PostWithUser) => {
 };
 
 const Home: NextPage = () => {
-  const { data, isLoading } = api.posts.getAll.useQuery();
-  if (isLoading) return <div>Loading posts...</div>;
-  if (!data) return <div>Something went wrong 😒</div>;
+  // start fetching first
+  api.posts.getAll.useQuery();
   return (
     <>
       <Head>
@@ -82,25 +101,7 @@ const Home: NextPage = () => {
         <header className="p-2">
           <div className="container mx-auto flex flex-col items-center justify-between gap-14 py-5 md:flex-row">
             <span className="whitespace-nowrap text-xl">Cheep🦜</span>
-
             <CreatePost></CreatePost>
-            {/* <button
-              onClick={() => signOut()}
-              className=" inline-flex items-center rounded border-0 bg-rose-500 px-3 py-1 text-base text-white shadow hover:bg-rose-700 focus:outline-none md:mt-0"
-            >
-              Sign out
-              <svg
-                fill="none"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                className="ml-1 h-4 w-4"
-                viewBox="0 0 24 24"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7"></path>
-              </svg>
-            </button> */}
           </div>
         </header>
       </SignedIn>
@@ -112,11 +113,7 @@ const Home: NextPage = () => {
               <SignInButton />
             </div>
           </SignedOut>
-          <div className="flex flex-col gap-8 overflow-y-scroll p-4">
-            {[...data].map((postWithUser) => (
-              <PostView {...postWithUser} key={postWithUser.post.id}></PostView>
-            ))}
-          </div>
+          <Feed></Feed>
         </div>
       </main>
     </>
