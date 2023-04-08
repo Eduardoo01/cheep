@@ -14,6 +14,7 @@ import type { RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
+import { LoadingPage } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
@@ -21,7 +22,7 @@ const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
 
   // TODO ADD LOADING STATE
-  if (postsLoading) return <div>Loading posts...</div>;
+  if (postsLoading) return <LoadingPage size={45} />;
 
   if (!data) return <div>Something went wrong 😒</div>;
 
@@ -37,15 +38,13 @@ const Feed = () => {
 const CreatePost = () => {
   const { user, isLoaded: userLoaded } = useUser();
   console.log(user);
-
-  //TODO RETURN LOADING STATE
-  if (!user || !userLoaded) return <div>Loading user...</div>;
+  if (!user || !userLoaded) return <LoadingPage />;
 
   return (
     <div className="flex w-full gap-14">
       <input
         type="text"
-        className="grow  border-b-2 border-zinc-800 bg-transparent p-2 focus:outline-none"
+        className="grow  border-b-2 border-zinc-800 bg-transparent  p-2 focus:outline-none"
         placeholder="Type some emojis"
       />
       <Image
