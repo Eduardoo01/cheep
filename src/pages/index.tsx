@@ -14,14 +14,13 @@ import type { RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
-import { LoadingPage } from "~/components/loading";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
 const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
-
-  // TODO ADD LOADING STATE
   if (postsLoading) return <LoadingPage size={45} />;
 
   if (!data) return <div>Something went wrong 😒</div>;
@@ -37,16 +36,33 @@ const Feed = () => {
 
 const CreatePost = () => {
   const { user, isLoaded: userLoaded } = useUser();
-  console.log(user);
   if (!user || !userLoaded) return <LoadingPage />;
-
+  const [userInput, setUserInput] = useState("");
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setUserInput("");
+      void ctx.posts.getAll.invalidate();
+    },
+  });
   return (
-    <div className="flex w-full gap-14">
+    <div className="flex w-full items-center gap-14">
       <input
         type="text"
         className="grow  border-b-2 border-zinc-800 bg-transparent  p-2 focus:outline-none"
         placeholder="Type some emojis"
+        value={userInput}
+        onChange={(e) => setUserInput(e.target.value)}
+        disabled={isPosting}
       />
+      <button
+        type="button"
+        className="flex items-center rounded-lg bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 px-5 py-2.5 text-center text-base font-bold text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800"
+        onClick={() => mutate({ content: userInput })}
+      >
+        {isPosting ?? <LoadingSpinner size={16}></LoadingSpinner>}
+        Post
+      </button>
       <Image
         src={user.profileImageUrl}
         alt="User profile picture"
@@ -75,7 +91,7 @@ const PostView = (props: PostWithUser) => {
       <div key={post.id} className="flex flex-col">
         <div className="flex flex-row gap-1">
           <span>{author?.username ? author.username : author.fullname}</span>
-          <span className="font-thin text-gray-900">
+          <span className="font-thin text-zinc-300">
             {`· ${dayjs(post.createdAt).fromNow()}`}
           </span>
         </div>
@@ -99,7 +115,7 @@ const Home: NextPage = () => {
       <SignedIn>
         <header className="p-2">
           <div className="container mx-auto flex flex-col items-center justify-between gap-14 py-5 md:flex-row">
-            <span className="whitespace-nowrap text-xl">Cheep🦜</span>
+            <span className="whitespace-nowrap text-xl">Cheep🦩</span>
             <CreatePost></CreatePost>
           </div>
         </header>
