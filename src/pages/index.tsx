@@ -44,6 +44,10 @@ const CreatePost = () => {
       setUserInput("");
       void ctx.posts.getAll.invalidate();
     },
+    onError(error, variables, context) {
+      setUserInput("");
+      return alert("You can only post emojis 🤦‍♂️");
+    },
   });
   return (
     <div className="flex w-full items-center gap-14">
