@@ -63,7 +63,7 @@ const CreatePost = () => {
         {isPosting && <LoadingSpinner size={16}></LoadingSpinner>}
         Post
       </button>
-      //TODO HANDLE RESPONSIVENESS
+      {/* TODO HANDLE RESPONSIVENESS */}
       <Image
         src={user.profileImageUrl}
         alt="User profile picture"
