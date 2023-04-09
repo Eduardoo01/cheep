@@ -89,7 +89,7 @@ const PostView = (props: PostWithUser) => {
         height={36}
       />
       <div key={post.id} className="flex flex-col">
-        <div className="flex flex-row gap-1">
+        <div className="flex flex-row gap-1 text-sm xs:text-base">
           <span>{author?.username ? author.username : author.fullname}</span>
           <span className="font-thin text-zinc-300">
             {`· ${dayjs(post.createdAt).fromNow()}`}
@@ -114,8 +114,10 @@ const Home: NextPage = () => {
 
       <SignedIn>
         <header className="p-2">
-          <div className="container mx-auto flex flex-col items-center justify-between gap-14 py-5 md:flex-row">
-            <span className="whitespace-nowrap text-xl">Cheep🦩</span>
+          <div className="container mx-auto flex  flex-row items-center justify-between gap-14 py-5">
+            <span className="hidden whitespace-nowrap text-xl md:block">
+              Cheep🦩
+            </span>
             <CreatePost></CreatePost>
           </div>
         </header>
