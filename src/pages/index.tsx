@@ -26,7 +26,7 @@ const Feed = () => {
   if (!data) return <div>Something went wrong 😒</div>;
 
   return (
-    <div className="flex flex-col gap-8 overflow-y-scroll p-4">
+    <div className="flex max-h-[85vh] flex-col gap-8 overflow-y-scroll p-4">
       {[...data].map((postWithUser) => (
         <PostView {...postWithUser} key={postWithUser.post.id}></PostView>
       ))}
@@ -60,7 +60,7 @@ const CreatePost = () => {
         className="flex items-center rounded-lg bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 px-5 py-2 text-center text-base font-bold text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800"
         onClick={() => mutate({ content: userInput })}
       >
-        {isPosting ?? <LoadingSpinner size={16}></LoadingSpinner>}
+        {isPosting && <LoadingSpinner size={16}></LoadingSpinner>}
         Post
       </button>
       <Image
@@ -122,7 +122,7 @@ const Home: NextPage = () => {
           </div>
         </header>
       </SignedIn>
-      <main className="">
+      <main className="overflow-none">
         <div className="h-full w-full">
           <SignedOut>
             <div>
