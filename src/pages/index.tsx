@@ -1,12 +1,14 @@
 import {
-  SignIn,
   SignInButton,
   SignOutButton,
-  useClerk,
   useUser,
   SignedIn,
   SignedOut,
+  UserProfile,
+  UserButton,
 } from "@clerk/nextjs";
+
+import { dark } from "@clerk/themes";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
@@ -39,7 +41,7 @@ const CreatePost = () => {
   if (!user || !userLoaded) return <LoadingPage />;
   const [userInput, setUserInput] = useState("");
   const ctx = api.useContext();
-  //TODO ADD BETTER ERROR HANDLING
+
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setUserInput("");
@@ -58,6 +60,14 @@ const CreatePost = () => {
         placeholder="Type some emojis"
         value={userInput}
         onChange={(e) => setUserInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (userInput !== "") {
+              mutate({ content: userInput });
+            }
+          }
+        }}
         disabled={isPosting}
       />
       <button
@@ -69,12 +79,16 @@ const CreatePost = () => {
         Post
       </button>
       {/* TODO HANDLE RESPONSIVENESS */}
-      <Image
-        src={user.profileImageUrl}
-        alt="User profile picture"
-        className="hidden h-12 w-12 rounded-full md:block"
-        width={48}
-        height={48}
+      <UserButton
+        appearance={{
+          baseTheme: dark,
+          elements: {
+            userButtonAvatarBox: {
+              width: 48,
+              height: 48,
+            },
+          },
+        }}
       />
     </div>
   );
