@@ -18,6 +18,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
@@ -49,7 +50,14 @@ const CreatePost = () => {
     },
     onError(error, variables, context) {
       setUserInput("");
-      return alert("You can only post emojis 🤦‍♂️");
+      const errorMessages = error.data?.zodError?.fieldErrors.content;
+      if (errorMessages && errorMessages[0]) {
+        toast.error(errorMessages[0], { position: "bottom-center" });
+      } else {
+        toast.error("Failed to post! Try again later", {
+          position: "bottom-center",
+        });
+      }
     },
   });
   return (
@@ -70,14 +78,17 @@ const CreatePost = () => {
         }}
         disabled={isPosting}
       />
-      <button
-        type="button"
-        className="flex items-center rounded-lg bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 px-5 py-2 text-center text-base font-bold text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800"
-        onClick={() => mutate({ content: userInput })}
-      >
-        {isPosting && <LoadingSpinner size={16}></LoadingSpinner>}
-        Post
-      </button>
+      {userInput !== "" && (
+        <button
+          type="button"
+          className="flex items-center rounded-lg bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 px-5 py-2 text-center text-base font-bold text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800"
+          onClick={() => mutate({ content: userInput })}
+          disabled={isPosting}
+        >
+          {isPosting && <LoadingSpinner size={16}></LoadingSpinner>}
+          Post
+        </button>
+      )}
       {/* TODO HANDLE RESPONSIVENESS */}
       <UserButton
         appearance={{
