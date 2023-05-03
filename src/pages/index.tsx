@@ -1,25 +1,21 @@
 import {
   SignInButton,
-  SignOutButton,
   useUser,
   SignedIn,
   SignedOut,
-  UserProfile,
   UserButton,
 } from "@clerk/nextjs";
 
 import { dark } from "@clerk/themes";
 import { type NextPage } from "next";
-import Head from "next/head";
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-
+import { Layout } from "~/components/layout";
+import { PostView } from "~/components/postView";
 dayjs.extend(relativeTime);
 
 const Feed = () => {
@@ -29,7 +25,7 @@ const Feed = () => {
   if (!data) return <div>Something went wrong 😒</div>;
 
   return (
-    <div className="flex max-h-[85vh] flex-col gap-8 overflow-y-scroll p-4">
+    <div className="flex max-h-[85vh] flex-col overflow-y-auto">
       {[...data].map((postWithUser) => (
         <PostView {...postWithUser} key={postWithUser.post.id}></PostView>
       ))}
@@ -39,6 +35,7 @@ const Feed = () => {
 
 const CreatePost = () => {
   const { user, isLoaded: userLoaded } = useUser();
+  console.log("user!", user);
   if (!user || !userLoaded) return <LoadingPage />;
   const [userInput, setUserInput] = useState("");
   const ctx = api.useContext();
@@ -81,12 +78,12 @@ const CreatePost = () => {
       {userInput !== "" && (
         <button
           type="button"
-          className="flex items-center rounded-lg bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 px-5 py-2 text-center text-base font-bold text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800"
+          className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500  to-blue-500 px-5 py-2.5 text-center text-base  font-bold  text-white hover:bg-gradient-to-bl  focus:outline-none focus:ring-4 focus:ring-cyan-300  dark:focus:ring-cyan-800"
           onClick={() => mutate({ content: userInput })}
           disabled={isPosting}
         >
-          {isPosting && <LoadingSpinner size={16}></LoadingSpinner>}
-          Post
+          Post emoji
+          {<LoadingSpinner size={16}></LoadingSpinner>}
         </button>
       )}
       {/* TODO HANDLE RESPONSIVENESS */}
@@ -105,13 +102,11 @@ const CreatePost = () => {
   );
 };
 
-type PostWithUser = RouterOutputs["posts"]["getAll"][number];
-
-// TODO ADD ALT FOR IMAGES
+/* type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
-    <div className="flex flex-row gap-5">
+    <div key={post.id} className="flex flex-row gap-5">
       <Image
         src={author.profileImageUrl}
         alt="user profile picture"
@@ -119,9 +114,13 @@ const PostView = (props: PostWithUser) => {
         width={36}
         height={36}
       />
-      <div key={post.id} className="flex flex-col">
+      <div className="flex flex-col">
         <div className="flex flex-row gap-1 text-sm xs:text-base">
-          <span>{author?.username ? author.username : author.fullname}</span>
+          <Link href={`/user/@${author.id}`}>
+            <span>
+              @{author?.username ? author?.username : author?.externalUsername}
+            </span>
+          </Link>
           <span className="font-thin text-zinc-300">
             {`· ${dayjs(post.createdAt).fromNow()}`}
           </span>
@@ -131,51 +130,41 @@ const PostView = (props: PostWithUser) => {
     </div>
   );
 };
-
+ */
 const Home: NextPage = () => {
   // start fetching first
   api.posts.getAll.useQuery();
   return (
     <>
-      <Head>
-        <title>Cheep🦩</title>
-        <meta
-          name="description"
-          content="Just a random website to post emojis"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <SignedIn>
-        <header className="p-2">
-          <div className="container mx-auto flex  flex-row items-center justify-between gap-14 py-5">
-            <span className="hidden whitespace-nowrap text-xl md:block">
-              Cheep🦩
-            </span>
-            <CreatePost></CreatePost>
-          </div>
-        </header>
-      </SignedIn>
-      <main className="overflow-none">
-        <div className="h-full w-full">
-          <SignedOut>
-            <div>
-              {" "}
-              <SignInButton mode="modal">
-                <div className="flex items-center justify-end py-4">
-                  <button
-                    type="button"
-                    className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
-                  >
-                    Sign in
-                  </button>
-                </div>
-              </SignInButton>
+      <Layout>
+        <SignedIn>
+          <header className="p-2">
+            <div className="container mx-auto flex  flex-row items-center justify-between gap-14 py-5">
+              <span className="hidden whitespace-nowrap text-xl md:block">
+                Cheep🦩
+              </span>
+              <CreatePost></CreatePost>
             </div>
-          </SignedOut>
-          <Feed></Feed>
-        </div>
-      </main>
+          </header>
+        </SignedIn>
+
+        <SignedOut>
+          <div>
+            {" "}
+            <SignInButton mode="modal">
+              <div className="flex items-center justify-end py-4">
+                <button
+                  type="button"
+                  className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                >
+                  Sign in
+                </button>
+              </div>
+            </SignInButton>
+          </div>
+        </SignedOut>
+        <Feed></Feed>
+      </Layout>
     </>
   );
 };

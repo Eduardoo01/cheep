@@ -2,16 +2,16 @@ import type { User } from "@clerk/nextjs/dist/api";
 import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
+import type { Post } from "@prisma/client";
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
-import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
+import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 // Create a new ratelimiter, that allows 10 requests per 60 seconds
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -25,13 +25,43 @@ const ratelimit = new Ratelimit({
   prefix: "@upstash/ratelimit",
 });
 
-const filterUsersForClient = (user: User) => {
-  return {
-    id: user.id,
-    username: user.username,
-    fullname: `${user.firstName} ${user.lastName}`,
-    profileImageUrl: user.profileImageUrl,
-  };
+const addUserDataToPosts = async (posts: Post[]) => {
+  const userId = posts.map((post) => post.authorId);
+  const users = (
+    await clerkClient.users.getUserList({
+      userId: userId,
+      limit: 110,
+    })
+  ).map(filterUserForClient);
+
+  return posts.map((post) => {
+    const author = users.find((user) => user.id === post.authorId);
+
+    if (!author) {
+      console.error("AUTHOR NOT FOUND", post);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Author for post not found. POST ID: ${post.id}, USER ID: ${post.authorId}`,
+      });
+    }
+    if (!author.username) {
+      // user the ExternalUsername
+      if (!author.externalUsername) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Author has no GitHub Account: ${author.id}`,
+        });
+      }
+      author.username = author.externalUsername;
+    }
+    return {
+      post,
+      author: {
+        ...author,
+        username: author.username ?? "(username not found)",
+      },
+    };
+  });
 };
 
 export const postsRouter = createTRPCRouter({
@@ -46,7 +76,7 @@ export const postsRouter = createTRPCRouter({
         userId: posts.map((post) => post.authorId),
         limit: 150,
       })
-    ).map(filterUsersForClient);
+    ).map(filterUserForClient);
     return posts.map((post) => {
       const author = users.find((user) => user.id === post.authorId);
 
@@ -65,6 +95,25 @@ export const postsRouter = createTRPCRouter({
       };
     });
   }),
+
+  getPostsByUserId: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .query(({ ctx, input }) =>
+      ctx.prisma.post
+        .findMany({
+          where: {
+            authorId: input.userId,
+          },
+          take: 100,
+          orderBy: [{ createdAt: "desc" }],
+        })
+        .then(addUserDataToPosts)
+    ),
+
   create: privateProcedure
     .input(
       z.object({

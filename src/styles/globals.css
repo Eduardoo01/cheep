@@ -4,4 +4,5 @@
 
 body {
   @apply m-auto flex w-full flex-col justify-center bg-zinc-700 text-white md:max-w-3xl;
+  overscroll-behavior: none;
 }
