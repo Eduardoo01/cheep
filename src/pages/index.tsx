@@ -78,7 +78,7 @@ const CreatePost = () => {
       {userInput !== "" && (
         <button
           type="button"
-          className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500  to-blue-500 px-5 py-2.5 text-center text-base  font-bold  text-white hover:bg-gradient-to-bl  focus:outline-none focus:ring-4 focus:ring-cyan-300  dark:focus:ring-cyan-800"
+          className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500  px-5 py-2.5 text-center text-base font-bold  text-white  hover:bg-gradient-to-bl focus:outline-none  focus:ring-4 focus:ring-cyan-300 dark:focus:ring-cyan-800  sm:hidden"
           onClick={() => mutate({ content: userInput })}
           disabled={isPosting}
         >
