@@ -83,7 +83,7 @@ const CreatePost = () => {
           disabled={isPosting}
         >
           Post emoji
-          {<LoadingSpinner size={16}></LoadingSpinner>}
+          {isPosting && <LoadingSpinner size={16}></LoadingSpinner>}
         </button>
       )}
       {/* TODO HANDLE RESPONSIVENESS */}
