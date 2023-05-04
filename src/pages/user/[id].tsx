@@ -8,7 +8,7 @@ const UserFeed = (props: { userId: string }) => {
     userId: props.userId,
   });
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading) return <LoadingPage size={40} />;
 
   if (!data || data.length === 0) return <div>User has not posted</div>;
 
@@ -41,6 +41,7 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
       </Head>
       <Layout>
         <Image
+          priority
           src={data.profileImageUrl}
           alt={`${
             data.username ?? data.externalUsername ?? "unknown"
@@ -65,7 +66,7 @@ import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import superjson from "superjson";
 import { Layout } from "~/components/layout";
-import { LoadingSpinner } from "~/components/loading";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { PostView } from "~/components/postView";
 
 export const getStaticProps: GetStaticProps = async (context) => {
@@ -74,7 +75,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
     ctx: { prisma, userId: null },
     transformer: superjson,
   });
-  console.log("CONTEXT", context);
   const slug = context.params?.id;
   if (typeof slug !== "string") throw new Error("error: no slug");
   const username = slug.replace("@", "");

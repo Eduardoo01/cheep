@@ -5,7 +5,6 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
-
 import { dark } from "@clerk/themes";
 import { type NextPage } from "next";
 import { api } from "~/utils/api";
@@ -16,6 +15,7 @@ import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { Layout } from "~/components/layout";
 import { PostView } from "~/components/postView";
+
 dayjs.extend(relativeTime);
 
 const Feed = () => {
@@ -35,7 +35,6 @@ const Feed = () => {
 
 const CreatePost = () => {
   const { user, isLoaded: userLoaded } = useUser();
-  console.log("user!", user);
   if (!user || !userLoaded) return <LoadingPage />;
   const [userInput, setUserInput] = useState("");
   const ctx = api.useContext();
@@ -102,35 +101,6 @@ const CreatePost = () => {
   );
 };
 
-/* type PostWithUser = RouterOutputs["posts"]["getAll"][number];
-const PostView = (props: PostWithUser) => {
-  const { post, author } = props;
-  return (
-    <div key={post.id} className="flex flex-row gap-5">
-      <Image
-        src={author.profileImageUrl}
-        alt="user profile picture"
-        className="h-9 w-9 rounded-full"
-        width={36}
-        height={36}
-      />
-      <div className="flex flex-col">
-        <div className="flex flex-row gap-1 text-sm xs:text-base">
-          <Link href={`/user/@${author.id}`}>
-            <span>
-              @{author?.username ? author?.username : author?.externalUsername}
-            </span>
-          </Link>
-          <span className="font-thin text-zinc-300">
-            {`· ${dayjs(post.createdAt).fromNow()}`}
-          </span>
-        </div>
-        <span className="text-2xl">{post.content}</span>
-      </div>
-    </div>
-  );
-};
- */
 const Home: NextPage = () => {
   // start fetching first
   api.posts.getAll.useQuery();
