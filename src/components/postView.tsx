@@ -38,7 +38,7 @@ export const PostView = (props: PostWithUser) => {
           >
             <span>{`@${
               author.username ? author.username : author.externalUsername
-            } `}</span>
+            }  · ${dayjs(post.createdAt).fromNow()}`}</span>
           </Link>
         </div>
         <span className="text-2xl">{post.content}</span>
